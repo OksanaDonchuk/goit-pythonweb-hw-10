@@ -57,6 +57,7 @@ async def login(
 @router.post(
     "/refresh", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
 )
+@router.post("/refresh", response_model=TokenResponse)
 async def refresh(
     refresh_token: RefreshTokenRequest,
     request: Request = None,

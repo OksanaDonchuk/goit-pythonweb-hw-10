@@ -1,18 +1,13 @@
 from fastapi import APIRouter, Depends, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.db import get_db
+from src.core.depend_service import get_auth_service
 from src.schemas.user_schema import UserResponse
 from src.services.auth_services import AuthService, oauth2_scheme
 
 router = APIRouter(prefix="/users", tags=["users"])
 limiter = Limiter(key_func=get_remote_address)
-
-
-def get_auth_service(db: AsyncSession = Depends(get_db)):
-    return AuthService(db)
 
 
 @router.get(
