@@ -7,6 +7,7 @@ import hashlib
 import redis.asyncio as redis
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from libgravatar import Gravatar
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.conf.config import settings
@@ -52,6 +53,12 @@ class AuthService:
                 detail=messages.authenticate_wrong_user,
             )
 
+        if not user.confirmed:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Електронна адреса не підтверджена",
+            )
+
         if not self._verify_password(password, user.hash_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -74,8 +81,17 @@ class AuthService:
                 detail=messages.mail_exists,
             )
 
+        avatar = None
+        try:
+            g = Gravatar(user_data.email)
+            avatar = g.get_image()
+        except Exception as e:
+            print(e)
+
         hashed_password = self._hash_password(user_data.password)
-        user = await self.user_repository.create_user(user_data, hashed_password)
+        user = await self.user_repository.create_user(
+            user_data, hashed_password, avatar
+        )
         return user
 
     def create_access_token(self, username: str) -> str:

@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 
 from src.conf import constants
 from src.conf import messages
+from src.entity.models import UserRole
 
 
 class UserBase(BaseModel):
@@ -34,5 +35,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
 
     id: int
+    avatar: str | None
+    role: UserRole
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,4 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    Query,
+    Request,
+    BackgroundTasks,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,6 +14,7 @@ from src.database.db import get_db
 from src.services.auth_services import AuthService, oauth2_scheme
 from src.schemas.token_schema import TokenResponse, RefreshTokenRequest
 from src.schemas.user_schema import UserResponse, UserCreate
+from src.services.email_services import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -23,9 +32,15 @@ def get_auth_service(db: AsyncSession = Depends(get_db)):
     response_description="Повертає користувача, або 409, якщо користувач з таким username або email вже існує.",
 )
 async def register(
-    user_data: UserCreate, auth_service: AuthService = Depends(get_auth_service)
+    user_data: UserCreate,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    auth_service: AuthService = Depends(get_auth_service),
 ):
     user = await auth_service.register_user(user_data)
+    background_tasks.add_task(
+        send_email, user_data.email, user_data.username, str(request.base_url)
+    )
     return user
 
 

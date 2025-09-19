@@ -1,6 +1,17 @@
 from datetime import datetime, date
+from enum import Enum
 
-from sqlalchemy import String, DateTime, func, Date, ForeignKey, UniqueConstraint, Text
+from sqlalchemy import (
+    String,
+    DateTime,
+    func,
+    Date,
+    ForeignKey,
+    UniqueConstraint,
+    Text,
+    Enum as SqlEnum,
+    Boolean,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src.conf import constants
@@ -26,12 +37,8 @@ class Contact(Base):
 
     __tablename__ = "contacts"
     __table_args__ = (
-        UniqueConstraint(
-            "email", "user_id", name="unique_contact_user_email"
-        ),
-        UniqueConstraint(
-            "phone", "user_id", name="unique_contact_user_phone"
-        ),
+        UniqueConstraint("email", "user_id", name="unique_contact_user_email"),
+        UniqueConstraint("phone", "user_id", name="unique_contact_user_phone"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -55,8 +62,7 @@ class Contact(Base):
         DateTime, default=func.now(), onupdate=func.now()
     )
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=True
     )
 
     user: Mapped["User"] = relationship("User", backref="contacts", lazy="joined")
@@ -68,6 +74,12 @@ class Contact(Base):
             f"last_name='{self.last_name}', email='{self.email}', "
             f"phone='{self.phone}', birthday={self.birthday})"
         )
+
+
+class UserRole(str, Enum):
+    USER = "USER"
+    MODERATOR = "MODERATOR"
+    ADMIN = "ADMIN"
 
 
 class User(Base):
@@ -88,6 +100,11 @@ class User(Base):
         String(constants.EMAIL_MAX_LENGTH), nullable=False, unique=True
     )
     hash_password: Mapped[str] = mapped_column(nullable=False)
+    role: Mapped[UserRole] = mapped_column(
+        SqlEnum(UserRole), default=UserRole.USER, nullable=False
+    )
+    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         "RefreshToken", back_populates="user"
