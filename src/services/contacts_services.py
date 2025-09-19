@@ -2,8 +2,8 @@ from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entity.models import Contact
-from src.repository.contacts import ContactRepository
-from src.schemas.contacts import ContactSchema, ContactUpdateSchema
+from src.repositories.contacts_repository import ContactRepository
+from src.schemas.contacts_schema import ContactSchema, ContactUpdateSchema
 
 
 class ContactService:

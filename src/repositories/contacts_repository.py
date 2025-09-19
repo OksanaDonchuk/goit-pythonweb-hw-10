@@ -4,7 +4,7 @@ from sqlalchemy import select, or_, func, case, literal, cast, Integer, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entity.models import Contact
-from src.schemas.contacts import ContactSchema, ContactUpdateSchema
+from src.schemas.contacts_schema import ContactSchema, ContactUpdateSchema
 
 
 class ContactRepository:

@@ -3,8 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
 from src.database.db import get_db
-from src.services.contacts import ContactService
-from src.schemas.contacts import ContactSchema, ContactUpdateSchema, ContactResponse
+from src.services.contacts_services import ContactService
+from src.schemas.contacts_schema import (
+    ContactSchema,
+    ContactUpdateSchema,
+    ContactResponse,
+)
 from src.conf import messages
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
